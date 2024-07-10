@@ -1,3 +1,15 @@
+/*
+=== Basic Register Page ===
+
+> Change colours? Bg?
+> User can choose custom theme? dark mode vs light mode
+> Add logos?
+> Make password **** instead
+> Button to show password
+> Forgot password functionality maybe??
+
+*/
+
 import { useState } from "react";
 
 export default function Register() {
