@@ -6,9 +6,29 @@ const cors = require('cors');
 const User = require('./models/User');
 
 dotenv.config();
-mongoose.connect(process.env.MONGO_URL, (err) => {
-    if (err) throw err;
+
+// Mongoose connection using promises
+mongoose.connect(process.env.MONGO_URL, {
+}).then(() => {
+    console.log('Connected to MongoDB');
+}).catch((err) => {
+    console.error('Error connecting to MongoDB:', err.message);
+    process.exit(1);
 });
+
+// // Use async/await for Mongoose connection
+// async function connectDB() {
+//     try {
+//       await mongoose.connect(process.env.MONGO_URL, {
+//       });
+//       console.log('Connected to MongoDB');
+//     } catch (err) {
+//       console.error('Error connecting to MongoDB:', err.message);
+//       process.exit(1);
+//     }
+//   }
+  
+//   connectDB();
 
 jwtSecret = process.env.JWT_SECRET;
 
@@ -31,7 +51,7 @@ app.post('/register', async (req,res) => {
         jwt.sign({userId:createdUser._id}, jwtSecret, (err, token) => {
             if (err) throw err;
             res.cookie('token', token).status(201).json({
-                _id: createdUser._id,
+                id: createdUser._id,
             });
         });
     } catch (err) {
