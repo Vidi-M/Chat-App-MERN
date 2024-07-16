@@ -9,6 +9,7 @@ export default function Chat() {
     const [onlinePeople, setOnlinePeople] = useState({});
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [newMessageText, setNewMessageText] = useState('');
+    const [messages, setMessages] = useState([]);
     const {username, id} = useContext(UserContext);
     // Websockets
     useEffect(() => {
@@ -26,10 +27,11 @@ export default function Chat() {
     }
     function handleMessage(ev) {
         const messageData = JSON.parse(ev.data);
+        console.log({ev, messageData});
         if ('online' in messageData) {
             showOnlinePeople(messageData.online);
-        } else {
-            console.log(messageData);
+        } else if ('text' in messageData){
+            setMessages(prev => ([...prev, {isOur:false, text: messageData.text}]));
         }
     }
     function sendMessage(ev) {
@@ -40,6 +42,8 @@ export default function Chat() {
             text: newMessageText,
         }));
         console.log('sent!')
+        setNewMessageText('');
+        setMessages(prev => ([...prev,{text: newMessageText, isOur:true}]));
     }
     const onlinePeopleExclOurUser = {...onlinePeople};
     delete onlinePeopleExclOurUser[id];
@@ -72,6 +76,13 @@ export default function Chat() {
                             <div className="text-gray-300 font-bold flex items-center">
                                 &larr; Select a person from the sidebar
                             </div>
+                        </div>
+                    )}
+                    {!!selectedUserId && (
+                        <div>
+                            {messages.map(message => (
+                                <div>{message.text}</div>
+                            ))}
                         </div>
                     )}
                 </div>
