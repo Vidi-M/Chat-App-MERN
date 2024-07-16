@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import Avatar from "./Avatar";
 import Logo from "./Logo";
 import { UserContext } from "./UserContext";
+import { uniqBy } from "lodash";
 
 export default function Chat() {
     // All the states
@@ -31,10 +32,10 @@ export default function Chat() {
         if ('online' in messageData) {
             showOnlinePeople(messageData.online);
         } else if ('text' in messageData){
-            setMessages(prev => ([...prev, {isOur:false, text: messageData.text}]));
+            setMessages(prev => ([...prev, {...messageData}]));
         }
     }
-    function sendMessage(ev) {
+    function sendMessage(ev) { 
         ev.preventDefault(); // so it doesn't reload the page
         console.log('sending...')
         ws.send(JSON.stringify({
@@ -43,10 +44,17 @@ export default function Chat() {
         }));
         console.log('sent!')
         setNewMessageText('');
-        setMessages(prev => ([...prev,{text: newMessageText, isOur:true}]));
+        setMessages(prev => ([...prev,{
+            text: newMessageText,
+            sender: id,
+            recipient: selectedUserId,
+        }]));
     }
     const onlinePeopleExclOurUser = {...onlinePeople};
     delete onlinePeopleExclOurUser[id];
+
+    const messagesWithoutDupes = uniqBy(messages, 'id');
+
     // UI
     return (
         <div className="flex h-screen">
@@ -79,9 +87,13 @@ export default function Chat() {
                         </div>
                     )}
                     {!!selectedUserId && (
-                        <div>
-                            {messages.map(message => (
-                                <div>{message.text}</div>
+                        <div className="overflow-scroll">
+                            {messagesWithoutDupes.map(message => (
+                                <div className={"p-2 " + (message.sender === id ? 'bg-blue-500 text-white':'bg-white text-gray-500')}>
+                                    sender:{message.sender} <br />
+                                    my id: {id} <br />
+                                    {message.text}
+                                </div>
                             ))}
                         </div>
                     )}
