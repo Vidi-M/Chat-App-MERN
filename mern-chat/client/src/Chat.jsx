@@ -37,17 +37,16 @@ export default function Chat() {
     }
     function sendMessage(ev) { 
         ev.preventDefault(); // so it doesn't reload the page
-        console.log('sending...')
         ws.send(JSON.stringify({
             recipient: selectedUserId,
             text: newMessageText,
         }));
-        console.log('sent!')
         setNewMessageText('');
         setMessages(prev => ([...prev,{
             text: newMessageText,
             sender: id,
             recipient: selectedUserId,
+            id: Date.now(),
         }]));
     }
     const onlinePeopleExclOurUser = {...onlinePeople};
@@ -87,12 +86,14 @@ export default function Chat() {
                         </div>
                     )}
                     {!!selectedUserId && (
-                        <div className="overflow-scroll">
+                        <div className="overflow-y-scroll">
                             {messagesWithoutDupes.map(message => (
-                                <div className={"p-2 " + (message.sender === id ? 'bg-blue-500 text-white':'bg-white text-gray-500')}>
-                                    sender:{message.sender} <br />
-                                    my id: {id} <br />
-                                    {message.text}
+                                <div className={(message.sender === id ? "text-right" : "text-left")}>
+                                    <div className={"text-left inline-block p-2 my-2 rounded-md text-sm " + (message.sender === id ? 'bg-blue-500 text-white' : 'bg-white text-gray-500')}>
+                                        sender:{message.sender} <br />
+                                        my id: {id} <br />
+                                        {message.text}
+                                    </div>
                                 </div>
                             ))}
                         </div>
