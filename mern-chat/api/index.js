@@ -25,15 +25,41 @@ const bcryptSalt = bcrypt.genSaltSync(10);
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors({
     credentials: true,
     origin: process.env.CLIENT_URL,
 }));
-app.use(cookieParser());
+
+async function getUserDataFromRequest(req) {
+    return new Promise((resolve, reject) => {
+        const {token} = req.cookies;
+        if (token) {
+            jwt.verify(token, jwtSecret, (err, userData) => {
+                if (err) throw err;
+                resolve(userData);
+            });
+        } else {
+            reject('no token');
+        }
+    });
+}
 
 
 app.get('/test', (req, res) => {
     res.json('test ok');
+});
+
+app.get('/messages/:userId', async (req,res) => {
+    const {userId} = req.params;
+    const userData = await getUserDataFromRequest(req);
+    const ourUserId = userData.userId;
+    console.log({userId, ourUserId})
+    const messages = await Message.find({
+        sender: {$in:[userId, ourUserId]}, 
+        recipient: {$in:[userId, ourUserId]}, 
+    }).sort({createdAt:-1});
+    res.json(messages);
 });
 
 app.get('/profile', (req,res) => {
