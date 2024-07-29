@@ -14,7 +14,7 @@ export default function Chat() {
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [newMessageText, setNewMessageText] = useState('');
     const [messages, setMessages] = useState([]);
-    const {username, id} = useContext(UserContext);
+    const {username, id, setId, setUsername} = useContext(UserContext);
     const divUnderMessages = useRef();
     // Websockets
     useEffect(() => {
@@ -38,6 +38,12 @@ export default function Chat() {
             people[userId] = username; 
         });
         setOnlinePeople(people);
+    }
+    function logout() {
+        axios.post('/logout').then(() => {
+            setId(null);
+            setUsername(null);
+        });
     }
     function handleMessage(ev) {
         const messageData = JSON.parse(ev.data);
@@ -99,32 +105,39 @@ export default function Chat() {
     // UI
     return (
         <div className="flex h-screen">
-            <div className="bg-white w-1/3">
-                <Logo />
-                {Object.keys(onlinePeopleExclOurUser).map(userId => (
-                    <Contact 
-                        key={userId}
-                        id={userId}
-                        online={true}
-                        username={onlinePeople[userId]}
-                        onClick={() => setSelectedUserId(userId)}
-                        selected={userId === selectedUserId} />
-                ))}
-                {Object.keys(offlinePeople).map(userId => (
-                    <Contact
-                        key={userId} 
-                        id={userId}
-                        online={false}
-                        username={offlinePeople[userId].username}
-                        onClick={() => setSelectedUserId(userId)}
-                        selected={userId === selectedUserId} />
-                ))}
+            <div className="bg-white w-1/3 flex flex-col">
+                <div className="flex-grow">
+                    <Logo />
+                    {Object.keys(onlinePeopleExclOurUser).map(userId => (
+                        <Contact 
+                            key={userId}
+                            id={userId}
+                            online={true}
+                            username={onlinePeople[userId]}
+                            onClick={() => setSelectedUserId(userId)}
+                            selected={userId === selectedUserId} />
+                    ))}
+                    {Object.keys(offlinePeople).map(userId => (
+                        <Contact
+                            key={userId} 
+                            id={userId}
+                            online={false}
+                            username={offlinePeople[userId].username}
+                            onClick={() => setSelectedUserId(userId)}
+                            selected={userId === selectedUserId} />
+                    ))}
+                </div>
+                <div className="p-2 text-center">
+                    <button 
+                        onClick={logout}
+                        className="text-sm bg-blue-100 py-1 px-2 text-gray-500 border rounded-sm">logout</button>
+                </div>
             </div>
             <div className="flex flex-col bg-blue-50 w-2/3 p-2">
                 <div className="flex-grow">
                     {!selectedUserId && (
                         <div className="flex h-full items-center justify-center">
-                            <div className="text-gray-300 font-bold flex items-center">
+                            <div className="text-gray-300 font-bold flex items-center text-2xl">
                                 &larr; Select a person from the sidebar
                             </div>
                         </div>
