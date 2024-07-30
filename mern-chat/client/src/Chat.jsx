@@ -41,10 +41,18 @@ export default function Chat() {
     }
     function logout() {
         axios.post('/logout').then(() => {
+            setWs(null);
             setId(null);
             setUsername(null);
+
+            setTimeout(() => {
+                window.location.reload(); // This will refresh the current page
+            }, 2000); // 2000 milliseconds = 2 seconds
+        }).catch((error) => {
+            console.error('Logout failed', error);
         });
     }
+
     function handleMessage(ev) {
         const messageData = JSON.parse(ev.data);
         console.log({ev, messageData});
